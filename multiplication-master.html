@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Multiplication Master</title>
+<script src="https://accounts.google.com/gsi/client" async></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f4ff;
+  --surface:#ffffff;
+  --surface2:#f7f8ff;
+  --border:#e2e6f3;
+  --text:#1a1d2e;
+  --text2:#5a5f7a;
+  --text3:#9499b5;
+  --accent:#4361ee;
+  --accent2:#3a0ca3;
+  --green:#2d9d6e;
+  --green-bg:#edfaf4;
+  --red:#d63031;
+  --red-bg:#fff0f0;
+  --amber:#e07b00;
+  --amber-bg:#fff8ec;
+  --radius:14px;
+  --radius-sm:8px;
+}
+body{font-family:'Nunito Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:16px}
+h1,h2,h3,h4{font-family:'Nunito',sans-serif}
+
+/* ── Layout ── */
+#app{max-width:700px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.screen{display:none}.screen.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem}
+.card-sm{padding:1rem 1.25rem}
+
+/* ── Auth screen ── */
+#screen-auth{text-align:center;padding-top:3rem}
+.auth-logo{font-family:'Nunito',sans-serif;font-size:3rem;font-weight:800;color:var(--accent);letter-spacing:-2px;margin-bottom:.25rem}
+.auth-logo span{color:var(--accent2)}
+.auth-sub{color:var(--text2);margin-bottom:2.5rem;font-size:1rem}
+.auth-card{max-width:380px;margin:0 auto;padding:2rem;text-align:center}
+#g_id_onload,#g_id_signin{display:flex;justify-content:center}
+.auth-note{font-size:.8rem;color:var(--text3);margin-top:1.5rem;line-height:1.6}
+.demo-btns{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem}
+
+/* ── Top bar ── */
+#topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.topbar-user{display:flex;align-items:center;gap:.6rem}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;flex-shrink:0}
+.avatar img{width:34px;height:34px;border-radius:50%;object-fit:cover}
+.user-name{font-weight:600;font-size:.9rem}
+.user-role{font-size:.75rem;color:var(--text3)}
+.topbar-actions{display:flex;gap:.5rem}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.2rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Nunito',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:.15s}
+.btn:hover{background:var(--surface2);border-color:var(--accent)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn-sm{padding:.35rem .8rem;font-size:.8rem}
+.btn-danger{border-color:#ffcdd2;background:#fff5f5;color:var(--red)}
+.btn-green{background:var(--green);border-color:var(--green);color:#fff}
+.btn-green:hover{background:#237a56}
+.btn-icon{padding:.45rem .7rem}
+
+/* ── Stage map ── */
+.stage-map{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.5rem;margin:1rem 0}
+.stage-chip{padding:.5rem .8rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface2);font-size:.82rem;display:flex;align-items:center;gap:.5rem;font-family:'Nunito',sans-serif;font-weight:600}
+.stage-chip.done{background:var(--green-bg);border-color:#86efcc;color:var(--green)}
+.stage-chip.current{background:#eef2ff;border-color:#a5b4fc;color:var(--accent)}
+.stage-chip.locked{opacity:.5}
+.chip-icon{font-size:.75rem}
+
+/* ── Progress bar ── */
+.pbar-wrap{margin-bottom:.5rem}
+.pbar{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;border:1px solid var(--border)}
+.pbar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent),#7c3aed);transition:width .4s ease}
+.pbar-label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text3);margin-top:.3rem}
+
+/* ── Stats row ── */
+.stats-row{display:flex;gap:.5rem;margin-bottom:1.25rem}
+.stat{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.6rem;text-align:center}
+.stat-num{font-family:'Nunito',sans-serif;font-size:1.4rem;font-weight:800}
+.stat-lbl{font-size:.7rem;color:var(--text3);margin-top:1px}
+.stat-num.green{color:var(--green)}.stat-num.red{color:var(--red)}.stat-num.amber{color:var(--amber)}
+
+/* ── Problem ── */
+.problem-card{background:linear-gradient(135deg,#eef2ff 0%,#f5f3ff 100%);border:1px solid #c7d2fe;border-radius:var(--radius);padding:2rem 1.5rem;text-align:center;margin-bottom:1.25rem;position:relative}
+.problem-equation{font-family:'Nunito',sans-serif;font-size:3.5rem;font-weight:800;color:var(--text);letter-spacing:-2px;line-height:1}
+.problem-equation .op{color:var(--accent)}
+.problem-equation .q{color:#a5b4fc}
+.timer-bar{height:4px;background:#e0e7ff;border-radius:99px;margin-top:1rem;overflow:hidden}
+.timer-fill{height:100%;border-radius:99px;background:var(--green);transition:width .1s linear}
+.timer-fill.warn{background:var(--amber)}.timer-fill.danger{background:var(--red)}
+.streak-badge{position:absolute;top:.75rem;right:.75rem;background:var(--amber-bg);border:1px solid #fde68a;color:var(--amber);border-radius:99px;padding:.2rem .6rem;font-size:.75rem;font-family:'Nunito',sans-serif;font-weight:700;display:none}
+
+/* ── Input + numpad ── */
+.answer-wrap{position:relative;margin-bottom:.75rem}
+.answer-input{width:100%;font-family:'Nunito',sans-serif;font-size:2rem;font-weight:700;text-align:center;border:2px solid var(--border);border-radius:var(--radius);padding:.75rem;background:var(--surface);color:var(--text);outline:none;transition:.15s;-moz-appearance:textfield}
+.answer-input::-webkit-inner-spin-button,.answer-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.answer-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(67,97,238,.12)}
+.answer-input.correct{border-color:var(--green);background:var(--green-bg)}
+.answer-input.wrong{border-color:var(--red);background:var(--red-bg)}
+.feedback{text-align:center;font-family:'Nunito',sans-serif;font-weight:700;font-size:1rem;min-height:1.4rem;margin-bottom:.5rem}
+.feedback.correct{color:var(--green)}.feedback.wrong{color:var(--red)}
+.hint-row{text-align:center;margin-bottom:.5rem}
+.hint-btn{background:none;border:none;color:var(--accent);font-size:.82rem;cursor:pointer;text-decoration:underline;font-family:'Nunito Sans',sans-serif}
+.hint-box{background:var(--amber-bg);border:1px solid #fde68a;color:var(--amber);border-radius:var(--radius-sm);padding:.6rem .9rem;font-size:.85rem;margin-bottom:.75rem;text-align:center}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:240px;margin:0 auto}
+.npb{padding:.8rem;font-family:'Nunito',sans-serif;font-size:1.1rem;font-weight:700;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);cursor:pointer;transition:.1s;user-select:none}
+.npb:hover{background:var(--surface2)}.npb:active{transform:scale(.93)}
+.npb.enter{background:var(--accent);border-color:var(--accent);color:#fff}
+.npb.enter:hover{background:var(--accent2)}
+.npb.wide{grid-column:span 2}
+
+/* ── Speed challenge ── */
+.speed-toggle{display:flex;align-items:center;gap:.6rem;justify-content:center;margin-bottom:.75rem}
+.toggle-track{width:38px;height:22px;border-radius:99px;background:var(--border);cursor:pointer;position:relative;transition:.2s;flex-shrink:0}
+.toggle-track.on{background:var(--accent)}
+.toggle-thumb{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.toggle-track.on .toggle-thumb{left:19px}
+.toggle-label{font-size:.82rem;color:var(--text2);font-family:'Nunito',sans-serif;font-weight:600}
+
+/* ── Stage complete / final ── */
+.big-icon{font-size:4rem;text-align:center;margin:1rem 0}
+.accuracy-ring-wrap{display:flex;justify-content:center;margin:1rem 0}
+.acc-circle{width:100px;height:100px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:4px solid var(--green);background:var(--green-bg)}
+.acc-pct{font-family:'Nunito',sans-serif;font-size:1.6rem;font-weight:800;color:var(--green)}
+.acc-lbl{font-size:.7rem;color:var(--text3)}
+
+/* ── Teacher dashboard ── */
+.teacher-tabs{display:flex;gap:.25rem;margin-bottom:1.25rem;background:var(--surface2);padding:.3rem;border-radius:var(--radius-sm);border:1px solid var(--border)}
+.tab{flex:1;padding:.5rem;text-align:center;border-radius:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;color:var(--text2);transition:.15s}
+.tab.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+
+.student-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.student-table th{text-align:left;padding:.6rem .75rem;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text3);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border)}
+.student-table td{padding:.65rem .75rem;border-bottom:1px solid var(--border)}
+.student-table tr:last-child td{border-bottom:none}
+.student-table tr:hover td{background:var(--surface2)}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:99px;font-size:.72rem;font-family:'Nunito',sans-serif;font-weight:700}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-amber{background:var(--amber-bg);color:var(--amber)}
+.badge-red{background:var(--red-bg);color:var(--red)}
+.badge-blue{background:#eef2ff;color:var(--accent)}
+
+.mini-stages{display:flex;gap:2px;flex-wrap:wrap}
+.mini-dot{width:10px;height:10px;border-radius:50%;background:var(--border)}
+.mini-dot.done{background:var(--green)}.mini-dot.current{background:var(--accent)}.mini-dot.missed{background:var(--red)}
+
+/* ── Settings panel ── */
+.settings-section{margin-bottom:1.5rem}
+.settings-section h3{font-size:.9rem;font-family:'Nunito',sans-serif;font-weight:700;margin-bottom:.75rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-key{font-size:.9rem;font-weight:600;font-family:'Nunito',sans-serif}
+.settings-val{font-size:.82rem;color:var(--text3)}
+.teacher-email-list{display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
+.email-chip{display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:.4rem .75rem;font-size:.82rem}
+.email-remove{background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem;padding:0 .2rem}
+.input-row{display:flex;gap:.4rem;margin-top:.5rem}
+.input-row input{flex:1;padding:.5rem .75rem;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:.85rem;background:var(--surface);color:var(--text);outline:none;font-family:'Nunito Sans',sans-serif}
+.input-row input:focus{border-color:var(--accent)}
+
+/* ── Drive export ── */
+.drive-section{background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #86efcc;border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem}
+.drive-section h3{color:var(--green);font-size:.95rem;margin-bottom:.5rem}
+.drive-icon{font-size:1.5rem;margin-right:.4rem}
+
+/* ── Confetti ── */
+#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;display:none}
+
+/* ── Responsive ── */
+@media(max-width:480px){
+  .problem-equation{font-size:2.8rem}
+  .stats-row .stat-num{font-size:1.1rem}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div id="app">
+
+<!-- ══ AUTH SCREEN ══ -->
+<div id="screen-auth" class="screen active">
+  <div class="auth-logo">✕ Mult<span>iply</span></div>
+  <p class="auth-sub">Master your times tables — from ×1 all the way to ×12</p>
+  <div class="card auth-card">
+    <p style="font-size:.9rem;color:var(--text2);margin-bottom:1.25rem;line-height:1.6">Sign in with your school Google account. Students see only their own progress. Teachers see the whole class.</p>
+    <div id="g_id_onload"
+      data-client_id="GOOGLE_CLIENT_ID_PLACEHOLDER"
+      data-callback="handleGoogleSignIn"
+      data-auto_prompt="false">
+    </div>
+    <div id="g_id_signin"
+      data-type="standard"
+      data-theme="outline"
+      data-size="large"
+      data-text="signin_with"
+      data-shape="rectangular"
+      data-logo_alignment="left">
+    </div>
+    <div class="auth-note">
+      Your data is stored privately on this device and synced to your Google Drive when online. Student data is never visible to other students.
+    </div>
+    <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border)">
+      <p style="font-size:.78rem;color:var(--text3);margin-bottom:.6rem">— Demo mode (no Google account needed) —</p>
+      <div class="demo-btns">
+        <button class="btn btn-sm btn-primary" onclick="demoLogin('student')">Demo: Student</button>
+        <button class="btn btn-sm" onclick="demoLogin('teacher')">Demo: Teacher</button>
+      </div>
+    </div>
+  </div>
+  <p style="text-align:center;font-size:.78rem;color:var(--text3);margin-top:1rem">
+    ⚙️ First time? A teacher must configure Google OAuth Client ID in Settings after logging in demo mode.
+  </p>
+</div>
+
+<!-- ══ STUDENT WELCOME ══ -->
+<div id="screen-welcome" class="screen">
+  <div id="topbar">
+    <div class="topbar-user">
+      <div class="avatar" id="topbar-avatar">?</div>
+      <div>
+        <div class="user-name" id="topbar-name">Student</div>
+        <div class="user-role">Student</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-sm" onclick="showScreen('screen-settings-student')">⚙️</button>
+      <button class="btn btn-sm btn-danger" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:1rem">
+    <h2 style="margin-bottom:.25rem">Your Progress</h2>
+    <p style="font-size:.85rem;color:var(--text3);margin-bottom:1rem" id="welcome-sub">Let's get started!</p>
+    <div class="pbar-wrap">
+      <div class="pbar"><div class="pbar-fill" id="welcome-pbar" style="width:0%"></div></div>
+      <div class="pbar-label"><span id="welcome-pbar-label">0 of 13 stages complete</span><span id="welcome-pct">0%</span></div>
+    </div>
+    <div class="stage-map" id="welcome-stage-map" style="margin-top:1rem"></div>
+  </div>
+  <div style="text-align:center">
+    <button class="btn btn-primary" style="font-size:1rem;padding:.75rem 2.5rem" onclick="startStudentFlow()" id="start-btn">Start Learning</button>
+  </div>
+</div>
+
+<!-- ══ QUIZ SCREEN ══ -->
+<div id="screen-quiz" class="screen">
+  <div id="topbar" style="margin-bottom:.75rem">
+    <div style="flex:1">
+      <div class="pbar-wrap">
+        <div class="pbar"><div class="pbar-fill" id="quiz-pbar" style="width:0%"></div></div>
+        <div class="pbar-label"><span id="quiz-stage-label">Stage 1</span><span id="quiz-q-count"></span></div>
+      </div>
+    </div>
+    <button class="btn btn-sm btn-danger" style="margin-left:.75rem" onclick="exitQuiz()">✕ Exit</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat"><div class="stat-num green" id="sq-correct">0</div><div class="stat-lbl">correct</div></div>
+    <div class="stat"><div class="stat-num red" id="sq-wrong">0</div><div class="stat-lbl">wrong</div></div>
+    <div class="stat"><div class="stat-num amber" id="sq-left">0</div><div class="stat-lbl">remaining</div></div>
+    <div class="stat"><div class="stat-num" id="sq-streak">0🔥</div><div class="stat-lbl">streak</div></div>
+  </div>
+  <div class="problem-card">
+    <div class="streak-badge" id="streak-badge">🔥 x5</div>
+    <div class="problem-equation" id="problem-eq"></div>
+    <div class="timer-bar" id="timer-bar-wrap" style="display:none"><div class="timer-fill" id="timer-fill" style="width:100%"></div></div>
+  </div>
+  <div class="speed-toggle">
+    <div class="toggle-track" id="speed-toggle" onclick="toggleSpeed()"><div class="toggle-thumb"></div></div>
+    <span class="toggle-label">Speed Challenge ⚡</span>
+  </div>
+  <input type="number" class="answer-input" id="answer-input" placeholder="?" inputmode="none" onkeydown="handleKey(event)">
+  <div class="feedback" id="quiz-feedback"></div>
+  <div class="hint-row"><button class="hint-btn" id="hint-btn" onclick="showHint()">💡 Need a hint?</button></div>
+  <div class="hint-box" id="hint-box" style="display:none"></div>
+  <div class="numpad">
+    <button class="npb" onclick="np('1')">1</button><button class="npb" onclick="np('2')">2</button><button class="npb" onclick="np('3')">3</button>
+    <button class="npb" onclick="np('4')">4</button><button class="npb" onclick="np('5')">5</button><button class="npb" onclick="np('6')">6</button>
+    <button class="npb" onclick="np('7')">7</button><button class="npb" onclick="np('8')">8</button><button class="npb" onclick="np('9')">9</button>
+    <button class="npb wide" onclick="np('0')">0</button><button class="npb" onclick="np('del')">⌫</button>
+    <button class="npb enter wide" onclick="submitAnswer()">✓ Enter</button>
+  </div>
+</div>
+
+<!-- ══ STAGE COMPLETE ══ -->
+<div id="screen-stage-done" class="screen">
+  <div class="card" style="text-align:center;padding:2rem">
+    <div class="big-icon" id="stage-done-icon">★</div>
+    <h1 style="margin-bottom:.5rem" id="stage-done-title"></h1>
+    <p style="color:var(--text2);font-size:.9rem;margin-bottom:1.5rem" id="stage-done-msg"></p>
+    <div class="accuracy-ring-wrap">
+      <div class="acc-circle"><div class="acc-pct" id="stage-acc-pct">0%</div><div class="acc-lbl">accuracy</div></div>
+    </div>
+    <div style="margin:1rem 0" id="stage-done-missed"></div>
+    <div class="stage-map" id="stage-done-map" style="margin:1rem 0"></div>
+    <button class="btn btn-primary" style="font-size:1rem;padding:.75rem 2rem;margin-top:.5rem" id="stage-done-next-btn" onclick="nextStage()">Continue →</button>
+  </div>
+</div>
+
+<!-- ══ FINAL SCREEN ══ -->
+<div id="screen-final" class="screen">
+  <div class="card" style="text-align:center;padding:2rem">
+    <div class="big-icon">🏆</div>
+    <h1 style="margin-bottom:.5rem">Multiplication Master!</h1>
+    <p style="color:var(--text2);font-size:.9rem;margin-bottom:1.5rem">You've learned all 144 multiplication facts from 1×1 to 12×12!</p>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num green" id="final-correct">0</div><div class="stat-lbl">correct</div></div>
+      <div class="stat"><div class="stat-num red" id="final-wrong">0</div><div class="stat-lbl">wrong</div></div>
+      <div class="stat"><div class="stat-num" id="final-pct">0%</div><div class="stat-lbl">accuracy</div></div>
+      <div class="stat"><div class="stat-num amber" id="final-best-streak">0</div><div class="stat-lbl">best streak</div></div>
+    </div>
+    <div class="drive-section" style="text-align:left">
+      <h3><span class="drive-icon">📊</span>Save your results</h3>
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:.75rem">Export your progress report to Google Drive as a spreadsheet your teacher can view.</p>
+      <button class="btn btn-green" onclick="exportToDrive()" id="export-btn">📤 Export to Google Drive</button>
+      <div id="export-status" style="margin-top:.5rem;font-size:.8rem;color:var(--text3)"></div>
+    </div>
+    <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem">
+      <button class="btn btn-primary" onclick="startStudentFlow()">🔄 Practice Again</button>
+      <button class="btn" onclick="showScreen('screen-welcome')">🏠 Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEACHER DASHBOARD ══ -->
+<div id="screen-teacher" class="screen">
+  <div id="topbar">
+    <div class="topbar-user">
+      <div class="avatar" id="teacher-avatar">T</div>
+      <div>
+        <div class="user-name" id="teacher-name">Teacher</div>
+        <div class="user-role" style="color:var(--accent);font-weight:700">Teacher Dashboard</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-sm" onclick="showScreen('screen-settings-teacher')">⚙️ Settings</button>
+      <button class="btn btn-sm btn-danger" onclick="signOut()">Sign out</button>
+    </div>
+  </div>
+  <div class="teacher-tabs">
+    <div class="tab active" onclick="switchTab('tab-roster')">👥 Class Roster</div>
+    <div class="tab" onclick="switchTab('tab-progress')">📊 Progress</div>
+    <div class="tab" onclick="switchTab('tab-reports')">📤 Reports</div>
+  </div>
+
+  <div id="tab-roster" class="tab-panel active">
+    <div class="card card-sm" style="margin-bottom:1rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <h3 style="font-size:.95rem">Students</h3>
+        <button class="btn btn-sm btn-primary" onclick="refreshRoster()">↻ Refresh</button>
+      </div>
+      <div id="roster-table-wrap">
+        <p style="color:var(--text3);font-size:.85rem">No students found yet. Students must sign in at least once.</p>
+      </div>
+    </div>
+    <div class="card card-sm">
+      <h3 style="font-size:.9rem;margin-bottom:.5rem">📋 Add Students Manually</h3>
+      <p style="font-size:.8rem;color:var(--text3);margin-bottom:.5rem">Add student email addresses so their data is associated with your class.</p>
+      <div class="input-row">
+        <input type="email" id="add-student-email" placeholder="student@school.edu">
+        <button class="btn btn-sm btn-primary" onclick="addStudentEmail()">Add</button>
+      </div>
+      <div id="student-email-list" class="teacher-email-list" style="margin-top:.75rem"></div>
+    </div>
+  </div>
+
+  <div id="tab-progress" class="tab-panel">
+    <div class="card card-sm">
+      <h3 style="font-size:.95rem;margin-bottom:.75rem">Class Progress Overview</h3>
+      <div id="progress-overview">
+        <p style="color:var(--text3);font-size:.85rem">No student data available yet.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-reports" class="tab-panel">
+    <div class="card card-sm">
+      <div class="drive-section">
+        <h3><span class="drive-icon">📊</span>Export Class Report to Google Drive</h3>
+        <p style="font-size:.82rem;color:var(--text2);margin-bottom:.75rem">Creates a Google Sheet in your Drive with every student's stage completion, accuracy, and total facts answered.</p>
+        <button class="btn btn-green" onclick="exportClassReport()">📤 Export Full Class Report</button>
+        <div id="class-export-status" style="margin-top:.5rem;font-size:.8rem;color:var(--text3)"></div>
+      </div>
+      <div style="margin-top:1rem">
+        <h3 style="font-size:.9rem;margin-bottom:.5rem">Individual Student Reports</h3>
+        <div id="individual-reports-list">
+          <p style="font-size:.82rem;color:var(--text3)">No students to export yet.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STUDENT SETTINGS ══ -->
+<div id="screen-settings-student" class="screen">
+  <div id="topbar">
+    <h2 style="font-size:1rem">Settings</h2>
+    <button class="btn btn-sm" onclick="showScreen('screen-welcome')">← Back</button>
+  </div>
+  <div class="card">
+    <div class="settings-section">
+      <h3>Account</h3>
+      <div class="settings-row">
+        <div><div class="settings-key" id="s-name-display">Name</div><div class="settings-val" id="s-email-display">email</div></div>
+        <button class="btn btn-sm btn-danger" onclick="signOut()">Sign out</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Progress</h3>
+      <div class="settings-row">
+        <div><div class="settings-key">Reset my progress</div><div class="settings-val">Start all stages over from the beginning</div></div>
+        <button class="btn btn-sm btn-danger" onclick="resetStudentProgress()">Reset</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TEACHER SETTINGS ══ -->
+<div id="screen-settings-teacher" class="screen">
+  <div id="topbar">
+    <h2 style="font-size:1rem">Teacher Settings</h2>
+    <button class="btn btn-sm" onclick="showScreen('screen-teacher')">← Back</button>
+  </div>
+  <div class="card">
+    <div class="settings-section">
+      <h3>Google OAuth Setup</h3>
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:.75rem;line-height:1.6">To enable Google Sign-In for the whole school, set your OAuth Client ID below. Get it from <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">Google Cloud Console</a> → APIs & Services → Credentials.</p>
+      <div class="input-row">
+        <input type="text" id="oauth-client-id-input" placeholder="xxxx.apps.googleusercontent.com">
+        <button class="btn btn-sm btn-primary" onclick="saveClientId()">Save</button>
+      </div>
+      <div id="oauth-save-status" style="font-size:.8rem;color:var(--green);margin-top:.4rem"></div>
+    </div>
+    <div class="settings-section">
+      <h3>Teacher Email Addresses</h3>
+      <p style="font-size:.82rem;color:var(--text2);margin-bottom:.5rem">Accounts with these emails get the Teacher Dashboard. Add all teachers in the school.</p>
+      <div class="input-row">
+        <input type="email" id="teacher-email-input" placeholder="teacher@school.edu">
+        <button class="btn btn-sm btn-primary" onclick="addTeacherEmail()">Add</button>
+      </div>
+      <div id="teacher-email-chips" class="teacher-email-list" style="margin-top:.75rem"></div>
+    </div>
+    <div class="settings-section">
+      <h3>School Name</h3>
+      <div class="input-row">
+        <input type="text" id="school-name-input" placeholder="My Elementary School">
+        <button class="btn btn-sm btn-primary" onclick="saveSchoolName()">Save</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <h3>Danger Zone</h3>
+      <div class="settings-row">
+        <div><div class="settings-key">Clear all student data</div><div class="settings-val">Removes ALL progress for ALL students on this device</div></div>
+        <button class="btn btn-sm btn-danger" onclick="clearAllData()">Clear All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ══════════════════════════════════════════════════════
+// CONFIGURATION
+// ══════════════════════════════════════════════════════
+const STAGES = [
+  {name:"1× facts",   factor:1,  tip:"Any number × 1 equals that number. Easy!"},
+  {name:"10× facts",  factor:10, tip:"Times 10? Just add a zero to the end!"},
+  {name:"5× facts",   factor:5,  tip:"Count by fives, or halve the ×10 answer."},
+  {name:"9× facts",   factor:9,  tip:"Trick: the two digits of a ×9 answer always add up to 9! (e.g. 9×7=63, 6+3=9)"},
+  {name:"2× facts",   factor:2,  tip:"Times 2 is just doubling the number."},
+  {name:"4× facts",   factor:4,  tip:"Double it, then double again!"},
+  {name:"3× facts",   factor:3,  tip:"Add the number three times. Or: ×2 + one more group."},
+  {name:"6× facts",   factor:6,  tip:"Try ×5 first, then add one more group."},
+  {name:"7× facts",   factor:7,  tip:"Trickiest one! Use the ones you know: 7×6 = 6×7."},
+  {name:"8× facts",   factor:8,  tip:"Double, double, double! (×2 three times)"},
+  {name:"11× facts",  factor:11, tip:"Up to 9: just repeat the digit! 7×11=77. For 11×11=121, 12×11=132."},
+  {name:"12× facts",  factor:12, tip:"×12 = ×10 + ×2. Add them together!"},
+  {name:"Random check",factor:null,tip:"Show what you know — all 144 facts in random order!"},
+];
+const SPEED_SECONDS = 10;
+
+// ══════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════
+let currentUser = null; // {sub, email, name, picture, role}
+let questions = [], qIdx = 0;
+let stageIdx = 0, correct = 0, wrong = 0, streak = 0, bestStreak = 0;
+let totalCorrect = 0, totalWrong = 0;
+let missedInStage = [];
+let awaitingNext = false;
+let speedMode = false;
+let timerInterval = null, timerVal = 0;
+let driveAccessToken = null;
+
+// ══════════════════════════════════════════════════════
+// STORAGE HELPERS
+// ══════════════════════════════════════════════════════
+function getConfig(){ return JSON.parse(localStorage.getItem('mm_config')||'{"teacherEmails":[],"schoolName":"My School","clientId":""}'); }
+function saveConfig(c){ localStorage.setItem('mm_config', JSON.stringify(c)); }
+
+function getStudentData(sub){
+  const all = JSON.parse(localStorage.getItem('mm_students')||'{}');
+  return all[sub] || {sub, stagesCompleted:[], stageStats:{}, totalCorrect:0, totalWrong:0, bestStreak:0, lastActive:null};
+}
+function saveStudentData(sub, data){
+  const all = JSON.parse(localStorage.getItem('mm_students')||'{}');
+  data.lastActive = new Date().toISOString();
+  all[sub] = data;
+  localStorage.setItem('mm_students', JSON.stringify(all));
+}
+function getAllStudents(){
+  return Object.values(JSON.parse(localStorage.getItem('mm_students')||'{}'));
+}
+function getRegisteredStudentEmails(){
+  const c = getConfig();
+  return c.registeredStudents || [];
+}
+
+// ══════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════
+function handleGoogleSignIn(response){
+  const payload = parseJwt(response.credential);
+  driveAccessToken = null;
+  // Request Drive token via implicit flow
+  requestDriveToken(payload);
+}
+function parseJwt(token){
+  const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+  return JSON.parse(atob(base64));
+}
+function requestDriveToken(payload){
+  const cfg = getConfig();
+  const clientId = cfg.clientId || document.getElementById('g_id_onload').dataset.client_id;
+  if(!clientId || clientId==='GOOGLE_CLIENT_ID_PLACEHOLDER'){
+    finishLogin(payload, null);
+    return;
+  }
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: clientId,
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    callback:(tokenResponse)=>{
+      driveAccessToken = tokenResponse.access_token;
+      finishLogin(payload, driveAccessToken);
+    },
+    error_callback:()=>{ finishLogin(payload, null); }
+  });
+  client.requestAccessToken({prompt:''});
+}
+function finishLogin(payload, token){
+  const cfg = getConfig();
+  const isTeacher = cfg.teacherEmails.includes(payload.email);
+  currentUser = {
+    sub: payload.sub,
+    email: payload.email,
+    name: payload.name,
+    picture: payload.picture,
+    role: isTeacher ? 'teacher' : 'student'
+  };
+  if(token) driveAccessToken = token;
+  afterLogin();
+}
+function demoLogin(role){
+  currentUser = {
+    sub: role==='teacher' ? 'demo_teacher_001' : 'demo_student_'+Math.random().toString(36).slice(2,6),
+    email: role==='teacher' ? 'teacher@demo.school' : 'student@demo.school',
+    name: role==='teacher' ? 'Ms. Demo Teacher' : 'Demo Student',
+    picture: null,
+    role
+  };
+  afterLogin();
+}
+function signOut(){
+  if(confirm('Sign out?')){
+    currentUser = null;
+    driveAccessToken = null;
+    showScreen('screen-auth');
+  }
+}
+function afterLogin(){
+  if(currentUser.role === 'teacher') showTeacherDashboard();
+  else showStudentWelcome();
+}
+
+// ══════════════════════════════════════════════════════
+// STUDENT WELCOME
+// ══════════════════════════════════════════════════════
+function showStudentWelcome(){
+  updateTopbar();
+  const data = getStudentData(currentUser.sub);
+  const done = data.stagesCompleted.length;
+  const pct = Math.round((done/STAGES.length)*100);
+  document.getElementById('welcome-pbar').style.width = pct+'%';
+  document.getElementById('welcome-pbar-label').textContent = `${done} of ${STAGES.length} stages complete`;
+  document.getElementById('welcome-pct').textContent = pct+'%';
+  if(done===0) document.getElementById('welcome-sub').textContent = "Let's start with the easy ones!";
+  else if(done===STAGES.length) document.getElementById('welcome-sub').textContent = "You've completed all stages! 🏆 Practice again?";
+  else document.getElementById('welcome-sub').textContent = `Great work! ${STAGES.length-done} stages to go.`;
+  // Stage map
+  const map = document.getElementById('welcome-stage-map');
+  map.innerHTML = STAGES.map((s,i)=>{
+    const isDone = data.stagesCompleted.includes(i);
+    const isCurrent = !isDone && i === (data.stagesCompleted.length > 0 ? Math.max(...data.stagesCompleted)+1 : 0) || (i===0 && done===0);
+    // find next stage
+    const nextStageIdx = findNextStage(data);
+    const cls = isDone ? 'done' : (i===nextStageIdx ? 'current' : 'locked');
+    const icon = isDone ? '✓' : (i===nextStageIdx ? '→' : '○');
+    return `<div class="stage-chip ${cls}"><span class="chip-icon">${icon}</span>${s.name}</div>`;
+  }).join('');
+  document.getElementById('start-btn').textContent = done===0 ? '▶ Start Learning' : done===STAGES.length ? '🔄 Practice Again' : '▶ Continue Learning';
+  showScreen('screen-welcome');
+}
+function findNextStage(data){
+  for(let i=0;i<STAGES.length;i++){
+    if(!data.stagesCompleted.includes(i)) return i;
+  }
+  return 0; // all done, restart
+}
+function updateTopbar(){
+  const av = document.getElementById('topbar-avatar');
+  const nm = document.getElementById('topbar-name');
+  if(currentUser.picture){
+    av.innerHTML = `<img src="${currentUser.picture}" alt="">`;
+  } else {
+    av.textContent = (currentUser.name||'?')[0].toUpperCase();
+  }
+  nm.textContent = currentUser.name || currentUser.email;
+}
+
+// ══════════════════════════════════════════════════════
+// QUIZ ENGINE
+// ══════════════════════════════════════════════════════
+function startStudentFlow(){
+  const data = getStudentData(currentUser.sub);
+  stageIdx = findNextStage(data);
+  beginStage(stageIdx);
+}
+function beginStage(idx){
+  stageIdx = idx;
+  questions = buildQuestions(idx);
+  qIdx = 0; correct = 0; wrong = 0; streak = 0; bestStreak = 0;
+  missedInStage = [];
+  totalCorrect = 0; totalWrong = 0;
+  awaitingNext = false;
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+function buildQuestions(idx){
+  const stage = STAGES[idx];
+  let qs = [];
+  if(stage.factor === null){
+    for(let a=1;a<=12;a++) for(let b=a;b<=12;b++) qs.push([a,b]);
+  } else {
+    const f = stage.factor;
+    for(let b=1;b<=12;b++) qs.push([f,b]);
+  }
+  return shuffle(qs);
+}
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+  return arr;
+}
+function renderQuestion(){
+  clearTimer();
+  awaitingNext = false;
+  const inp = document.getElementById('answer-input');
+  inp.value = ''; inp.className = 'answer-input'; inp.disabled = false;
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('quiz-feedback').className = 'feedback';
+  document.getElementById('hint-box').style.display = 'none';
+  document.getElementById('hint-btn').style.display = '';
+  inp.focus();
+
+  const total = questions.length;
+  const pct = (qIdx/total)*100;
+  document.getElementById('quiz-pbar').style.width = pct+'%';
+  document.getElementById('quiz-stage-label').textContent = `Stage ${stageIdx+1}: ${STAGES[stageIdx].name}`;
+  document.getElementById('quiz-q-count').textContent = `${qIdx+1} / ${total}`;
+  document.getElementById('sq-correct').textContent = correct;
+  document.getElementById('sq-wrong').textContent = wrong;
+  document.getElementById('sq-left').textContent = total - qIdx;
+  document.getElementById('sq-streak').textContent = streak + (streak>=3?'🔥':'');
+  const sb = document.getElementById('streak-badge');
+  if(streak>=5){ sb.style.display='block'; sb.textContent='🔥 ×'+streak; } else { sb.style.display='none'; }
+
+  const [a,b] = questions[qIdx];
+  document.getElementById('problem-eq').innerHTML = `${a} <span class="op">×</span> ${b} <span class="op">=</span> <span class="q">?</span>`;
+
+  if(speedMode) startTimer();
+}
+function startTimer(){
+  const bar = document.getElementById('timer-bar-wrap');
+  const fill = document.getElementById('timer-fill');
+  bar.style.display = 'block';
+  timerVal = SPEED_SECONDS * 10; // tenths
+  fill.style.width = '100%';
+  fill.className = 'timer-fill';
+  timerInterval = setInterval(()=>{
+    timerVal--;
+    const pct = (timerVal/(SPEED_SECONDS*10))*100;
+    fill.style.width = pct+'%';
+    if(pct < 40) fill.className='timer-fill warn';
+    if(pct < 20) fill.className='timer-fill danger';
+    if(timerVal <= 0){
+      clearInterval(timerInterval);
+      timeUp();
+    }
+  }, 100);
+}
+function clearTimer(){ clearInterval(timerInterval); document.getElementById('timer-bar-wrap').style.display='none'; }
+function timeUp(){
+  const [a,b]=questions[qIdx];
+  const ans = a*b;
+  const inp = document.getElementById('answer-input');
+  inp.className='answer-input wrong'; inp.disabled=true;
+  document.getElementById('quiz-feedback').textContent = `⏱ Time's up! ${a} × ${b} = ${ans}`;
+  document.getElementById('quiz-feedback').className='feedback wrong';
+  wrong++; totalWrong++;
+  streak = 0;
+  if(!missedInStage.find(q=>q[0]===a&&q[1]===b)) missedInStage.push([a,b]);
+  awaitingNext = true;
+  setTimeout(nextQ, 1600);
+}
+function np(val){
+  if(awaitingNext){ nextQ(); return; }
+  const inp = document.getElementById('answer-input');
+  if(val==='del') inp.value=inp.value.slice(0,-1);
+  else inp.value += val;
+}
+function handleKey(e){ if(e.key==='Enter'){ if(awaitingNext) nextQ(); else submitAnswer(); } }
+function submitAnswer(){
+  if(awaitingNext){ nextQ(); return; }
+  const inp = document.getElementById('answer-input');
+  const val = parseInt(inp.value, 10);
+  if(isNaN(val)){ inp.focus(); return; }
+  clearTimer();
+  const [a,b] = questions[qIdx];
+  const ans = a*b;
+  const fb = document.getElementById('quiz-feedback');
+  inp.disabled = true;
+  if(val === ans){
+    inp.className='answer-input correct';
+    streak++; if(streak>bestStreak) bestStreak=streak;
+    correct++; totalCorrect++;
+    fb.textContent = streak>=5 ? `🔥 ${streak} in a row! ${ans}` : streak>=3 ? `Amazing! ${ans} ✓` : 'Correct! ✓';
+    fb.className='feedback correct';
+    awaitingNext = true;
+    setTimeout(nextQ, 700);
+  } else {
+    inp.className='answer-input wrong';
+    streak = 0;
+    wrong++; totalWrong++;
+    fb.textContent = `Not quite — ${a} × ${b} = ${ans}`;
+    fb.className='feedback wrong';
+    if(!missedInStage.find(q=>q[0]===a&&q[1]===b)) missedInStage.push([a,b]);
+    awaitingNext = true;
+    setTimeout(nextQ, 1800);
+  }
+  document.getElementById('sq-correct').textContent = correct;
+  document.getElementById('sq-wrong').textContent = wrong;
+}
+function nextQ(){
+  qIdx++;
+  if(qIdx >= questions.length) finishStage();
+  else renderQuestion();
+}
+function showHint(){
+  document.getElementById('hint-box').textContent = '💡 ' + STAGES[stageIdx].tip;
+  document.getElementById('hint-box').style.display = 'block';
+  document.getElementById('hint-btn').style.display = 'none';
+}
+function toggleSpeed(){
+  speedMode = !speedMode;
+  const t = document.getElementById('speed-toggle');
+  t.classList.toggle('on', speedMode);
+}
+function exitQuiz(){
+  if(confirm('Exit quiz? Progress on this stage will not be saved.')) showStudentWelcome();
+}
+
+// ══════════════════════════════════════════════════════
+// STAGE COMPLETE
+// ══════════════════════════════════════════════════════
+function finishStage(){
+  clearTimer();
+  const total = questions.length;
+  const acc = total > 0 ? Math.round((correct/total)*100) : 100;
+  const isLast = stageIdx === STAGES.length - 1;
+
+  // Save progress
+  const data = getStudentData(currentUser.sub);
+  if(!data.stagesCompleted.includes(stageIdx)) data.stagesCompleted.push(stageIdx);
+  data.stageStats[stageIdx] = {correct, wrong, acc, date: new Date().toISOString()};
+  data.totalCorrect = (data.totalCorrect||0) + correct;
+  data.totalWrong = (data.totalWrong||0) + wrong;
+  if(bestStreak > (data.bestStreak||0)) data.bestStreak = bestStreak;
+  data.name = currentUser.name;
+  data.email = currentUser.email;
+  saveStudentData(currentUser.sub, data);
+
+  if(isLast) { showFinalScreen(data); return; }
+
+  // Show stage complete
+  document.getElementById('stage-done-icon').textContent = acc===100 ? '🌟' : acc>=80 ? '⭐' : '✓';
+  document.getElementById('stage-done-title').textContent = `${STAGES[stageIdx].name} complete!`;
+  document.getElementById('stage-acc-pct').textContent = acc+'%';
+  document.getElementById('stage-done-msg').textContent =
+    acc===100 ? 'Perfect score! You nailed every single one!' :
+    acc>=80 ? 'Great work! You\'re getting really good at these.' :
+    'Good effort! Keep practicing those tricky ones.';
+
+  // Missed facts
+  const missedWrap = document.getElementById('stage-done-missed');
+  if(missedInStage.length > 0){
+    missedWrap.innerHTML = `<p style="font-size:.82rem;color:var(--text3);margin-bottom:.4rem">Review these:</p>`
+      + `<div style="display:flex;gap:.3rem;flex-wrap:wrap;justify-content:center">`
+      + missedInStage.map(([a,b])=>`<span style="background:var(--red-bg);border:1px solid #fca5a5;border-radius:6px;padding:.2rem .5rem;font-size:.82rem;font-family:'Nunito',sans-serif;font-weight:700;color:var(--red)">${a}×${b}=${a*b}</span>`).join('')
+      + `</div>`;
+  } else missedWrap.innerHTML = '';
+
+  // Stage map
+  renderStageMap('stage-done-map', data);
+  document.getElementById('stage-done-next-btn').textContent = `Continue to ${STAGES[stageIdx+1].name} →`;
+
+  if(acc===100 || acc >= 90) launchConfetti();
+  showScreen('screen-stage-done');
+}
+function nextStage(){
+  const data = getStudentData(currentUser.sub);
+  const next = findNextStage(data);
+  beginStage(next);
+}
+function showFinalScreen(data){
+  const tc = data.totalCorrect || correct;
+  const tw = data.totalWrong || wrong;
+  const pct = tc+tw>0 ? Math.round((tc/(tc+tw))*100) : 100;
+  document.getElementById('final-correct').textContent = tc;
+  document.getElementById('final-wrong').textContent = tw;
+  document.getElementById('final-pct').textContent = pct+'%';
+  document.getElementById('final-best-streak').textContent = data.bestStreak || bestStreak;
+  launchConfetti();
+  showScreen('screen-final');
+}
+function renderStageMap(containerId, data){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = STAGES.map((s,i)=>{
+    const isDone = data.stagesCompleted.includes(i);
+    const next = findNextStage(data);
+    const cls = isDone ? 'done' : (i===next ? 'current' : 'locked');
+    const icon = isDone ? '✓' : (i===next ? '→' : '○');
+    return `<div class="stage-chip ${cls}"><span class="chip-icon">${icon}</span>${s.name}</div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// TEACHER DASHBOARD
+// ══════════════════════════════════════════════════════
+function showTeacherDashboard(){
+  const av = document.getElementById('teacher-avatar');
+  if(currentUser.picture) av.innerHTML=`<img src="${currentUser.picture}" alt="">`;
+  else av.textContent = (currentUser.name||'T')[0].toUpperCase();
+  document.getElementById('teacher-name').textContent = currentUser.name || currentUser.email;
+  loadTeacherSettings();
+  refreshRoster();
+  showScreen('screen-teacher');
+}
+function switchTab(tabId){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['tab-roster','tab-progress','tab-reports'][i]===tabId));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===tabId));
+  if(tabId==='tab-progress') renderProgressOverview();
+  if(tabId==='tab-reports') renderReportsList();
+}
+function refreshRoster(){
+  const students = getAllStudents();
+  const wrap = document.getElementById('roster-table-wrap');
+  if(students.length===0){
+    wrap.innerHTML='<p style="color:var(--text3);font-size:.85rem">No students found. Students must sign in at least once.</p>';
+    return;
+  }
+  wrap.innerHTML = `<table class="student-table">
+    <thead><tr><th>Student</th><th>Stages</th><th>Accuracy</th><th>Last Active</th></tr></thead>
+    <tbody>${students.map(s=>{
+      const done = s.stagesCompleted ? s.stagesCompleted.length : 0;
+      const pct = s.totalCorrect+s.totalWrong>0 ? Math.round((s.totalCorrect/(s.totalCorrect+s.totalWrong))*100) : '—';
+      const badge = pct==='—' ? 'badge-blue' : pct>=90?'badge-green':pct>=70?'badge-amber':'badge-red';
+      const last = s.lastActive ? new Date(s.lastActive).toLocaleDateString() : 'Never';
+      const dots = STAGES.map((_,i)=>`<div class="mini-dot ${s.stagesCompleted&&s.stagesCompleted.includes(i)?'done':''}"></div>`).join('');
+      return `<tr>
+        <td><div style="font-weight:600">${s.name||'Unknown'}</div><div style="font-size:.75rem;color:var(--text3)">${s.email||s.sub}</div></td>
+        <td><div class="mini-stages">${dots}</div><div style="font-size:.75rem;color:var(--text3);margin-top:.2rem">${done}/${STAGES.length}</div></td>
+        <td><span class="badge ${badge}">${pct==='—'?'—':pct+'%'}</span></td>
+        <td style="font-size:.82rem;color:var(--text3)">${last}</td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+function renderProgressOverview(){
+  const students = getAllStudents();
+  const wrap = document.getElementById('progress-overview');
+  if(students.length===0){ wrap.innerHTML='<p style="color:var(--text3);font-size:.85rem">No student data.</p>'; return; }
+  const stageCompletions = STAGES.map((_,i)=>students.filter(s=>s.stagesCompleted&&s.stagesCompleted.includes(i)).length);
+  wrap.innerHTML = `
+    <div class="stats-row" style="margin-bottom:1rem">
+      <div class="stat"><div class="stat-num">${students.length}</div><div class="stat-lbl">students</div></div>
+      <div class="stat"><div class="stat-num green">${students.filter(s=>s.stagesCompleted&&s.stagesCompleted.length===STAGES.length).length}</div><div class="stat-lbl">completed all</div></div>
+      <div class="stat"><div class="stat-num">${students.filter(s=>s.stagesCompleted&&s.stagesCompleted.length>0).length}</div><div class="stat-lbl">started</div></div>
+    </div>
+    <h4 style="font-size:.82rem;color:var(--text3);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.04em">Stage completion</h4>
+    ${STAGES.map((s,i)=>{
+      const n = stageCompletions[i];
+      const pct = students.length>0 ? Math.round((n/students.length)*100) : 0;
+      return `<div style="margin-bottom:.5rem">
+        <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:.2rem">
+          <span style="font-family:'Nunito',sans-serif;font-weight:600">${s.name}</span>
+          <span style="color:var(--text3)">${n}/${students.length}</span>
+        </div>
+        <div class="pbar"><div class="pbar-fill" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('')}`;
+}
+function renderReportsList(){
+  const students = getAllStudents();
+  const wrap = document.getElementById('individual-reports-list');
+  if(students.length===0){ wrap.innerHTML='<p style="font-size:.82rem;color:var(--text3)">No students yet.</p>'; return; }
+  wrap.innerHTML = students.map(s=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600;font-size:.9rem;font-family:'Nunito',sans-serif">${s.name||'Unknown'}</div>
+        <div style="font-size:.75rem;color:var(--text3)">${s.email||s.sub}</div>
+      </div>
+      <button class="btn btn-sm" onclick="exportStudentReport('${s.sub}')">📤 Export</button>
+    </div>`).join('');
+}
+function addStudentEmail(){
+  const inp = document.getElementById('add-student-email');
+  const email = inp.value.trim().toLowerCase();
+  if(!email) return;
+  const cfg = getConfig();
+  if(!cfg.registeredStudents) cfg.registeredStudents = [];
+  if(!cfg.registeredStudents.includes(email)) cfg.registeredStudents.push(email);
+  saveConfig(cfg);
+  inp.value = '';
+  renderStudentEmailList();
+}
+function renderStudentEmailList(){
+  const cfg = getConfig();
+  const list = cfg.registeredStudents || [];
+  const el = document.getElementById('student-email-list');
+  if(!el) return;
+  el.innerHTML = list.map(e=>`<div class="email-chip"><span>${e}</span><button class="email-remove" onclick="removeStudentEmail('${e}')">✕</button></div>`).join('');
+}
+function removeStudentEmail(email){
+  const cfg = getConfig();
+  cfg.registeredStudents = (cfg.registeredStudents||[]).filter(e=>e!==email);
+  saveConfig(cfg);
+  renderStudentEmailList();
+}
+
+// ══════════════════════════════════════════════════════
+// TEACHER SETTINGS
+// ══════════════════════════════════════════════════════
+function loadTeacherSettings(){
+  const cfg = getConfig();
+  document.getElementById('oauth-client-id-input').value = cfg.clientId || '';
+  document.getElementById('school-name-input').value = cfg.schoolName || '';
+  renderTeacherEmailChips();
+  renderStudentEmailList();
+}
+function saveClientId(){
+  const val = document.getElementById('oauth-client-id-input').value.trim();
+  const cfg = getConfig(); cfg.clientId = val; saveConfig(cfg);
+  document.getElementById('oauth-save-status').textContent = '✓ Saved! Reload the page for Google Sign-In to use the new Client ID.';
+  setTimeout(()=>document.getElementById('oauth-save-status').textContent='', 4000);
+}
+function addTeacherEmail(){
+  const inp = document.getElementById('teacher-email-input');
+  const email = inp.value.trim().toLowerCase();
+  if(!email) return;
+  const cfg = getConfig();
+  if(!cfg.teacherEmails.includes(email)) cfg.teacherEmails.push(email);
+  saveConfig(cfg); inp.value = '';
+  renderTeacherEmailChips();
+}
+function renderTeacherEmailChips(){
+  const cfg = getConfig();
+  const el = document.getElementById('teacher-email-chips');
+  if(!el) return;
+  el.innerHTML = cfg.teacherEmails.map(e=>`<div class="email-chip"><span>${e}</span><button class="email-remove" onclick="removeTeacherEmail('${e}')">✕</button></div>`).join('');
+}
+function removeTeacherEmail(email){
+  const cfg = getConfig(); cfg.teacherEmails=cfg.teacherEmails.filter(e=>e!==email); saveConfig(cfg); renderTeacherEmailChips();
+}
+function saveSchoolName(){
+  const val = document.getElementById('school-name-input').value.trim();
+  const cfg = getConfig(); cfg.schoolName = val; saveConfig(cfg);
+  alert('School name saved!');
+}
+function clearAllData(){
+  if(confirm('⚠️ This will delete ALL student progress on this device. Are you sure?')){
+    localStorage.removeItem('mm_students');
+    alert('All student data cleared.');
+    refreshRoster();
+  }
+}
+function resetStudentProgress(){
+  if(confirm('Reset all your progress? You will start from Stage 1.')){
+    const data = getStudentData(currentUser.sub);
+    data.stagesCompleted = []; data.stageStats = {}; data.totalCorrect = 0; data.totalWrong = 0; data.bestStreak = 0;
+    saveStudentData(currentUser.sub, data);
+    showStudentWelcome();
+  }
+}
+
+// ══════════════════════════════════════════════════════
+// GOOGLE DRIVE EXPORT
+// ══════════════════════════════════════════════════════
+async function exportToDrive(){
+  const btn = document.getElementById('export-btn');
+  const status = document.getElementById('export-status');
+  if(!driveAccessToken){ status.textContent = '⚠️ Not connected to Google Drive (sign in with a Google account to enable)'; return; }
+  btn.disabled = true; btn.textContent = '⏳ Exporting...';
+  const data = getStudentData(currentUser.sub);
+  const cfg = getConfig();
+  const sheetData = buildStudentSheetData(currentUser, data, cfg);
+  try {
+    const url = await createGoogleSheet(sheetData, `${currentUser.name} - Multiplication Progress`);
+    status.innerHTML = `✅ <a href="${url}" target="_blank" style="color:var(--green)">View your report in Google Drive →</a>`;
+    btn.textContent = '✓ Exported!';
+  } catch(e){
+    status.textContent = '❌ Export failed: ' + e.message;
+    btn.disabled = false; btn.textContent = '📤 Export to Google Drive';
+  }
+}
+async function exportClassReport(){
+  const status = document.getElementById('class-export-status');
+  if(!driveAccessToken){ status.textContent = '⚠️ Not connected to Google Drive. Sign in with Google to enable.'; return; }
+  const students = getAllStudents();
+  const cfg = getConfig();
+  if(students.length===0){ status.textContent = 'No student data to export.'; return; }
+  status.textContent = '⏳ Creating spreadsheet...';
+  try {
+    const rows = [
+      ['Student Name','Email','Stages Completed','Total Correct','Total Wrong','Accuracy','Best Streak','Last Active',
+       ...STAGES.map(s=>s.name+' (acc%)')],
+      ...students.map(s=>{
+        const done = (s.stagesCompleted||[]).length;
+        const tc = s.totalCorrect||0, tw = s.totalWrong||0;
+        const acc = tc+tw>0 ? Math.round((tc/(tc+tw))*100)+'%' : '—';
+        const stageAccs = STAGES.map((_,i)=>s.stageStats&&s.stageStats[i] ? s.stageStats[i].acc+'%' : '—');
+        return [s.name||'',s.email||s.sub,`${done}/${STAGES.length}`,tc,tw,acc,s.bestStreak||0,
+          s.lastActive?new Date(s.lastActive).toLocaleDateString():'—',...stageAccs];
+      })
+    ];
+    const title = `${cfg.schoolName||'School'} - Class Multiplication Report ${new Date().toLocaleDateString()}`;
+    const url = await createGoogleSheet(rows, title);
+    status.innerHTML = `✅ <a href="${url}" target="_blank" style="color:var(--green)">View class report in Google Drive →</a>`;
+  } catch(e){
+    status.textContent = '❌ Export failed: ' + e.message;
+  }
+}
+async function exportStudentReport(sub){
+  if(!driveAccessToken){ alert('Not connected to Google Drive. Sign in with Google to enable.'); return; }
+  const s = getStudentData(sub);
+  const cfg = getConfig();
+  const rows = buildStudentSheetData({name:s.name,email:s.email}, s, cfg);
+  try {
+    const url = await createGoogleSheet(rows, `${s.name||sub} - Multiplication Report`);
+    window.open(url, '_blank');
+  } catch(e){ alert('Export failed: '+e.message); }
+}
+function buildStudentSheetData(user, data, cfg){
+  const rows = [
+    ['Student Report — '+( cfg.schoolName||'Multiplication Master')],
+    ['Name', user.name||''], ['Email', user.email||''],
+    ['Total Correct', data.totalCorrect||0], ['Total Wrong', data.totalWrong||0],
+    ['Best Streak', data.bestStreak||0],
+    ['Last Active', data.lastActive?new Date(data.lastActive).toLocaleDateString():'—'],
+    [],
+    ['Stage','Status','Correct','Wrong','Accuracy','Date Completed'],
+    ...STAGES.map((s,i)=>{
+      const done = (data.stagesCompleted||[]).includes(i);
+      const stats = (data.stageStats||{})[i];
+      return [s.name, done?'Completed':'Not started', stats?stats.correct:'—', stats?stats.wrong:'—',
+        stats?stats.acc+'%':'—', stats?new Date(stats.date).toLocaleDateString():'—'];
+    })
+  ];
+  return rows;
+}
+async function createGoogleSheet(rows, title){
+  // Step 1: Create spreadsheet
+  const createRes = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+    method:'POST',
+    headers:{'Authorization':'Bearer '+driveAccessToken,'Content-Type':'application/json'},
+    body: JSON.stringify({properties:{title}, sheets:[{properties:{title:'Report'}}]})
+  });
+  if(!createRes.ok) throw new Error('Could not create sheet ('+createRes.status+')');
+  const sheet = await createRes.json();
+  const spreadsheetId = sheet.spreadsheetId;
+  const sheetId = sheet.sheets[0].properties.sheetId;
+
+  // Step 2: Write data
+  const values = rows.map(r=>r.map(c=>String(c??'')));
+  const range = `Report!A1:${colLetter(values[0]?.length||1)}${values.length}`;
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=RAW`,{
+    method:'PUT',
+    headers:{'Authorization':'Bearer '+driveAccessToken,'Content-Type':'application/json'},
+    body: JSON.stringify({range, majorDimension:'ROWS', values})
+  });
+
+  // Step 3: Format header row
+  await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+driveAccessToken,'Content-Type':'application/json'},
+    body: JSON.stringify({requests:[{
+      repeatCell:{range:{sheetId,startRowIndex:0,endRowIndex:1},
+        cell:{userEnteredFormat:{backgroundColor:{red:.26,green:.38,blue:.93},textFormat:{foregroundColor:{red:1,green:1,blue:1},bold:true}}},
+        fields:'userEnteredFormat(backgroundColor,textFormat)'}
+    }]})
+  });
+  return `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
+}
+function colLetter(n){ let s=''; while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26);} return s||'A'; }
+
+// ══════════════════════════════════════════════════════
+// CONFETTI
+// ══════════════════════════════════════════════════════
+function launchConfetti(){
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const pieces = Array.from({length:120},()=>({
+    x: Math.random()*canvas.width, y: Math.random()*canvas.height-canvas.height,
+    w: 8+Math.random()*8, h: 4+Math.random()*4,
+    color:['#4361ee','#7c3aed','#2d9d6e','#e07b00','#d63031'][Math.floor(Math.random()*5)],
+    speed: 2+Math.random()*4, angle: Math.random()*360, spin: (Math.random()-.5)*6
+  }));
+  let frame = 0;
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    pieces.forEach(p=>{
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.angle*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+      p.y+=p.speed; p.angle+=p.spin;
+    });
+    frame++;
+    if(frame<120) requestAnimationFrame(draw);
+    else { ctx.clearRect(0,0,canvas.width,canvas.height); canvas.style.display='none'; }
+  }
+  draw();
+}
+
+// ══════════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Init Google Sign-In with saved client ID
+(function initGSI(){
+  const cfg = getConfig();
+  if(cfg.clientId && cfg.clientId !== 'GOOGLE_CLIENT_ID_PLACEHOLDER'){
+    const el = document.getElementById('g_id_onload');
+    if(el) el.dataset.client_id = cfg.clientId;
+  }
+})();
+</script>
+</body>
+</html>
